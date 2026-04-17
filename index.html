@@ -122,15 +122,15 @@
           ${pid > 1 ? `<button class="remove-person-btn" onclick="removePerson(${pid})">✕</button>` : ''}
         </div>
         <div class="field">
+          <label>日程</label>
+          <input type="date" id="date-${pid}" value="${getToday()}" required>
+        </div>
+        <div class="field">
           <label>名前</label>
           <select id="name-${pid}" required>
             <option value="">選択してください</option>
             ${dancerOptions()}
           </select>
-        </div>
-        <div class="field">
-          <label>日程</label>
-          <input type="date" id="date-${pid}" value="${getToday()}" required>
         </div>
         <div class="jobs-section">
           <div class="jobs-label">案件（複数追加可）</div>
@@ -190,11 +190,11 @@
       const personCards = document.querySelectorAll('.person-card');
       for (const pcard of personCards) {
         const pid = pcard.id.replace('person-', '');
-        const name = document.getElementById(`name-${pid}`).value;
         const rawDate = document.getElementById(`date-${pid}`).value;
         const date = rawDate.replace(/-/g, '/');
-        if (!name) throw new Error(`${pid}人目: 名前を選択してください`);
+        const name = document.getElementById(`name-${pid}`).value;
         if (!date) throw new Error(`${pid}人目: 日程を入力してください`);
+        if (!name) throw new Error(`${pid}人目: 名前を選択してください`);
         const jobItems = pcard.querySelectorAll('.job-item');
         if (jobItems.length === 0) throw new Error(`${pid}人目: 案件を1件以上追加してください`);
         for (const jitem of jobItems) {
@@ -244,7 +244,7 @@
           </div>
         `).join('');
         card.innerHTML = `
-          <div class="confirm-person">👤 ${g.name}　📅 ${g.date}</div>
+          <div class="confirm-person">📅 ${g.date}　👤 ${g.name}</div>
           ${jobRows}
           <div class="confirm-total">計 ${g.jobs.length} 案件</div>
         `;

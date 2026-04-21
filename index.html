@@ -88,6 +88,7 @@
     let personCount = 0;
     const jobCountMap = {};
     let pendingRows = [];
+    let jobTree = {};
 
     async function init() {
       try {
@@ -96,7 +97,26 @@
         try { liffProfile = await liff.getProfile(); } catch (e) {}
         const res = await fetch(`${GAS_URL}?action=getMaster`);
         const json = await res.json();
-        if (json.ok) masterData = json.data;
+        if (json.ok) {
+          masterData = json.data;
+          
+          jobTree = {};
+          masterData.jobNames.forEach(rawName => {
+            const match = rawName.match(/^([^\s　]+)[\s　]+(.*)$/);
+            let category = 'その他';
+            let subCategory = rawName;
+            
+            if (match) {
+              category = match[1];
+              subCategory = match[2];
+            }
+            
+            if (!jobTree[category]) {
+              jobTree[category] = [];
+            }
+            jobTree[category].push({ label: subCategory, value: rawName });
+          });
+        }
         document.getElementById('loading').style.display = 'none';
         document.getElementById('form-view').style.display = 'block';
         addPerson();
@@ -107,7 +127,7 @@
 
     function getToday() { return new Date().toISOString().split('T')[0]; }
     function dancerOptions() { return masterData.dancerNames.map(d => `<option value="${d}">${d}</option>`).join(''); }
-    function jobOptions() { return masterData.jobNames.map(j => `<option value="${j}">${j}</option>`).join(''); }
+    function billingOptions() { return Object.keys(jobTree).map(cat => `<option value="${cat}">${cat}</option>`).join(''); }
 
     function addPerson() {
       personCount++;
@@ -159,11 +179,16 @@
           ${jid > 1 ? `<button class="remove-job-btn" onclick="removeJob(${pid}, ${jid})">✕</button>` : ''}
         </div>
         <div class="field">
-          <label>案件名</label>
-          <select id="jobname-${pid}-${jid}" required>
-            <option value="">選択してください</option>
-            ${jobOptions()}
-          </select>
+          <label>請求元 / 案件名</label>
+          <div style="display:flex; gap:8px;">
+            <select id="billing-${pid}-${jid}" onchange="updateJobDetail(${pid}, ${jid})" required>
+              <option value="">請求元を選択</option>
+              ${billingOptions()}
+            </select>
+            <select id="jobname-${pid}-${jid}" required disabled>
+              <option value="">案件を選択</option>
+            </select>
+          </div>
         </div>
         <div class="job-row">
           <div class="qty-wrap field">
@@ -182,6 +207,25 @@
     function removeJob(pid, jid) {
       const el = document.getElementById(`job-${pid}-${jid}`);
       if (el) el.remove();
+    }
+
+    function updateJobDetail(pid, jid) {
+      const billingSelect = document.getElementById(`billing-${pid}-${jid}`);
+      const detailSelect = document.getElementById(`jobname-${pid}-${jid}`);
+      const category = billingSelect.value;
+      
+      detailSelect.innerHTML = '<option value="">案件を選択</option>';
+      if (category && jobTree[category]) {
+        jobTree[category].forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.value;
+          opt.textContent = item.label;
+          detailSelect.appendChild(opt);
+        });
+        detailSelect.disabled = false;
+      } else {
+        detailSelect.disabled = true;
+      }
     }
 
     // バリデーションしてrowsを返す

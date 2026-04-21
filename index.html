@@ -101,21 +101,17 @@
           masterData = json.data;
           
           jobTree = {};
-          masterData.jobNames.forEach(rawName => {
-            const match = rawName.match(/^([^\s　]+)[\s　]+(.*)$/);
-            let category = 'その他';
-            let subCategory = rawName;
-            
-            if (match) {
-              category = match[1];
-              subCategory = match[2];
-            }
-            
-            if (!jobTree[category]) {
-              jobTree[category] = [];
-            }
-            jobTree[category].push({ label: subCategory, value: rawName });
-          });
+          if (masterData.jobList) {
+            masterData.jobList.forEach(job => {
+              let category = job.billing || 'その他';
+              let subCategory = job.name;
+              
+              if (!jobTree[category]) {
+                jobTree[category] = [];
+              }
+              jobTree[category].push({ label: subCategory, value: subCategory });
+            });
+          }
         }
         document.getElementById('loading').style.display = 'none';
         document.getElementById('form-view').style.display = 'block';

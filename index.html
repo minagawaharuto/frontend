@@ -89,7 +89,7 @@
   </div>
 
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8fx-xcbIy91smr70t9uvYTW4YcF4HC-Otg5K394JTHH8xFm78x4kmK-Kd7pzurN6__g/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycby0m9u7DkCtV7nZw77qJNUriqsgAAIP3_sw9_nyzHJYDee9ap61lFLCaH4OKsCH2peW1Q/exec';
     const LIFF_ID = '2009725727-3jvV9g52';
 
     let liffProfile = null;
@@ -144,7 +144,7 @@
       card.innerHTML = `
         <div class="person-header">
           <span class="person-title">${pid}人目</span>
-          ${pid > 1 ? `<button class="remove-person-btn" onclick="removePerson(${pid})">✕</button>` : ''}
+          <button class="remove-person-btn" onclick="removePerson(${pid})">✕</button>
         </div>
         <div class="field">
           <label>日程</label>
@@ -181,7 +181,7 @@
       item.innerHTML = `
         <div class="job-item-header">
           <span class="job-number">案件 ${jid}</span>
-          ${jid > 1 ? `<button class="remove-job-btn" onclick="removeJob(${pid}, ${jid})">✕</button>` : ''}
+          <button class="remove-job-btn" onclick="removeJob(${pid}, ${jid})">✕</button>
         </div>
         <div class="field">
           <label>請求元 / 案件名</label>
@@ -251,6 +251,7 @@
     function collectRows() {
       const rows = [];
       const personCards = document.querySelectorAll('.person-card');
+      if (personCards.length === 0) throw new Error('人物を1件以上追加してください');
       for (const pcard of personCards) {
         const pid = pcard.id.replace('person-', '');
         const rawDate = document.getElementById(`date-${pid}`).value;
